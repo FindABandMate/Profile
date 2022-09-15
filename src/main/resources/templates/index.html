@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:tiles="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <title>POC</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+    <h1>BandMates</h1>
+    <div id="profileContent">
+        <div id="left" class="column">
+            <img id="profilePhoto" th:src="${'http://127.0.0.1:5001/content/' + profilePhoto}" alt="hello">
+            <ul id="photos">
+                <li th:each="photo : ${userPhotos}" class="smallPhoto">
+                    <img th:src="${'http://127.0.0.1:5001/content/' + photo.photoName}" alt="hello">
+                </li>
+            </ul>
+        </div>
+        <div id="middle" class="column">
+            <div>
+                <h2>Stone Canyon Circle:</h2>
+                Lorem ipsum, dolor sit amet consectetur adipisicing elit.
+                Impedit culpa blanditiis quam quasi tempora praesentium perferendis,
+                nostrum est nemo ab vitae earum amet asperiores aliquid alias ullam
+                rem expedita reiciendis!
+            </div>
+        </div>
+        <div id="right" class="column">
+            <div>
+                <h2>Seeking:</h2>
+                Lorem ipsum, dolor sit amet consectetur adipisicing elit.
+                Impedit culpa blanditiis quam quasi tempora praesentium perferendis,
+                nostrum est nemo ab vitae earum amet asperiores aliquid alias ullam
+                rem expedita reiciendis!
+            </div>
+            <div>
+                <h2>Sound Demo</h2>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Song Name</th>
+                            <th>Audio</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="song : ${userSongs}">
+                            <td class="songName" th:text="song.songName">
+                                Placeholder
+                            </td>
+                            <td class="audioPlayerContainer">
+                                <audio class="customAudioPlayer">
+                                    <source th:src="${'http://127.0.0.1:5001/content/' + song.songName}"
+                                        type="audio/mpeg">
+                                </audio>
+                                <img src="content/play-button.svg" class="playPauseButton">
+                                <div class="seek-container">
+                                    <input class="seekslider" type="range" min="0" step="1" value="0">
+                                    <div class="seek-values" style="display:flex">
+                                        <div class="current-time" style="flex:1;"></div>
+                                        <div class="total-time" style="flex: 1; text-align:right;"></div>
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</body>
+
+<script>
+    //var song = document.getElementById('customAudioPlayer');
+    var playPauseButtons = document.getElementsByClassName('playPauseButton')
+    var currentTimeContainers = document.getElementsByClassName('current-time');
+    var totalTimeContainers = document.getElementsByClassName('total-time');
+    var seekSliders = document.getElementsByClassName("seekslider");
+    var songs = document.getElementsByClassName('customAudioPlayer');
+
+    for (let i = 0; i < songs.length; i++) {
+        songs[i].addEventListener('loadedmetadata', () => {
+            totalTimeContainers[i].innerHTML = convertElapsedTime(songs[i].duration);
+            currentTimeContainers[i].innerHTML = convertElapsedTime(songs[i].currentTime);
+            seekSliders[i].max = songs[i].duration;
+            seekSliders[i].setAttribute("value", songs[i].currentTime);
+        })
+
+        playPauseButtons[i].addEventListener("click", () => {
+            // If song is paused, click will play
+            if (songs[i].paused) {
+                songs[i].play();
+                playPauseButtons[i].src = "content/pause-button.svg"
+            }
+            // If song is playing, click will pause
+            else {
+                songs[i].pause();
+                playPauseButtons[i].src = "content/play-button.svg"
+            }
+        })
+
+        songs[i].addEventListener('timeupdate', () => {
+            currentTimeContainers[i].innerHTML = convertElapsedTime(songs[i].currentTime);
+            // The two lines below seem duplicate, but are both needed in some browsers
+            // The first one updates the value attribute in the slider
+            seekSliders[i].setAttribute("value", songs[i].currentTime);
+            /// The second one keeps the slider handle/thumb moving
+            seekSliders[i].value = songs[i].currentTime;
+
+            // When the audio ends, we need to hide the pause button and show the play button
+            if (songs[i].ended) {
+                playPauseButtons[i].src = "content/play-button.svg"
+            }
+        });
+
+        seekSliders[i].addEventListener("change", () => {
+            songs[i].currentTime = seekSliders[i].value;
+        });
+    }
+
+    function convertElapsedTime(inputSeconds) {
+        var seconds = Math.floor(inputSeconds % 60)
+        if (seconds < 10) {
+            seconds = "0" + seconds
+        }
+        var minutes = Math.floor(inputSeconds / 60)
+        return minutes + ":" + seconds
+    }
+</script>
+
+</html>

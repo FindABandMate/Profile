@@ -24,7 +24,7 @@ public class IndexController {
 
     // Create index.html file in resources/templates and use thymeleaf
     @GetMapping
-    public String getHomepage(Model model, @RequestParam long userId){// " select * from your mom;
+    public String getHomepage(Model model, @RequestParam long userId){
         List<Photo> photos = profileService.getPhotosByUser(userId);
         List<Song> songs = profileService.getSongsByUser(userId);
         model.addAttribute("profilePhoto", profileService.getPhotosByUser(userId).get(0).getPhotoName());
